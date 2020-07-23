@@ -410,5 +410,9 @@ class Manager(BaseAPI):
             databases.append(db)
         return databases
 
+    def get_database(self, database_id):
+        data = self.get_data('databases/%s' % database_id)
+        return Database(**data['database'])
+
     def __str__(self):
         return "<Manager>"
