@@ -24,7 +24,7 @@ from .Snapshot import Snapshot
 from .Tag import Tag
 from .Volume import Volume
 from .ProjectResource import ProjectResource
-
+from .Database import Database
 
 class Manager(BaseAPI):
     def __init__(self, *args, **kwargs):
@@ -401,6 +401,14 @@ class Manager(BaseAPI):
             resource = ProjectResource(**jsoned)
             resources.append(resource)
         return resources
+
+    def get_all_databases(self):
+        data = self.get_data('databases')
+        databases = list()
+        for jsoned in data['databases']:
+            db = Database(**jsoned)
+            databases.append(db)
+        return databases
 
     def __str__(self):
         return "<Manager>"

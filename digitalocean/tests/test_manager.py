@@ -658,7 +658,7 @@ class TestManager(BaseTest):
         self.assertEqual(p.updated_at, '2018-09-27T20:10:35Z')
 
     @responses.activate
-    def test_get_all_projects(self):
+    def test_get_all_project_resources(self):
         data = self.load_from_file('projectresource/all.json')
 
         url = self.base_url + f'projects/%s/resources' % self.project.id
@@ -674,6 +674,65 @@ class TestManager(BaseTest):
         self.assertEqual(r.urn, 'do:droplet:1')
         self.assertEqual(r.assigned_at, '2018-09-28T19:26:37Z')
         self.assertEqual(r.status, 'ok')
+
+    @responses.activate
+    def test_get_all_databases(self):
+        data = self.load_from_file('database/all.json')
+
+        url = self.base_url + 'databases'
+        responses.add(responses.GET,
+                      url,
+                      body=data,
+                      status=200,
+                      content_type='application/json')
+
+        databases = self.manager.get_all_databases()
+        d = databases[0]
+
+        self.assertEqual(d.id, '9cc10173-e9ea-4176-9dbc-a4cee4c4ff30')
+        self.assertEqual(d.name, 'backend')
+        self.assertEqual(d.engine, 'pg')
+        self.assertEqual(d.version, '10')
+        self.assertDictEqual(d.connection, {
+            "uri": "postgres://doadmin:wv78n3zpz42xezdk@backend-do-user-19081923-0.db.ondigitalocean.com:25060/defaultdb?sslmode=require",
+            "database": "",
+            "host": "backend-do-user-19081923-0.db.ondigitalocean.com",
+            "port": 25060,
+            "user": "doadmin",
+            "password": "wv78n3zpz42xezdk",
+            "ssl": True
+        })
+        self.assertDictEqual(d.private_connection, {
+            "uri": "postgres://doadmin:wv78n3zpz42xezdk@private-backend-do-user-19081923-0.db.ondigitalocean.com:25060/defaultdb?sslmode=require",
+            "database": "",
+            "host": "private-backend-do-user-19081923-0.db.ondigitalocean.com",
+            "port": 25060,
+            "user": "doadmin",
+            "password": "wv78n3zpz42xezdk",
+            "ssl": True
+        })
+        self.assertDictEqual(d.users[0], {
+            "name": "doadmin",
+            "role": "primary",
+            "password": "wv78n3zpz42xezdk"
+        })
+        self.assertListEqual(d.db_names, ["defaultdb"])
+        self.assertEqual(d.num_nodes, 1)
+        self.assertEqual(d.region, 'nyc3')
+        self.assertEqual(d.status, 'online')
+        self.assertEqual(d.created_at, '2019-01-11T18:37:36Z')
+        self.assertDictEqual(d.maintenance_window, {
+            "day": "saturday",
+            "hour": "08:45:12",
+            "pending": True,
+            "description": [
+                "Update TimescaleDB to version 1.2.1",
+                "Upgrade to PostgreSQL 11.2 and 10.7 bugfix releases"
+            ]
+        })
+        self.assertEqual(d.size, 'db-s-2vcpu-4gb')
+        self.assertListEqual(d.tags, ['production'])
+        self.assertEqual(d.private_network_uuid, 'd455e75d-4858-4eec-8c95-da2f0a5f93a7')
 
 
 if __name__ == '__main__':
