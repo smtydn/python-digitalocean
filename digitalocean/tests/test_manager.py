@@ -14,6 +14,7 @@ class TestManager(BaseTest):
         self.image = digitalocean.Image(
             id=449676856, slug='testslug', token=self.token
         )
+        self.project = digitalocean.Project(id='4e1bfbc3-dc3e-41f2-a18f-1b4d7ba71679')
 
     @responses.activate
     def test_get_account(self):
@@ -357,7 +358,7 @@ class TestManager(BaseTest):
         self.assertEqual(key.name, "Example Key")
         self.assertEqual(key.id, 1)
         self.assertEqual(key.public_key,
-            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAQQDGk5V68BJ4P3Ereh779Vi/Ft2qs/rbXrcjKLGo6zsyeyFUE0svJUpRDEJvFSf8RlezKx1/1ulJu9+kZsxRiUKn example")
+                         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAQQDGk5V68BJ4P3Ereh779Vi/Ft2qs/rbXrcjKLGo6zsyeyFUE0svJUpRDEJvFSf8RlezKx1/1ulJu9+kZsxRiUKn example")
         self.assertEqual(key.fingerprint,
                          "f5:d1:78:ed:28:72:5f:e1:ac:94:fd:1f:e0:a3:48:6d")
 
@@ -464,7 +465,7 @@ class TestManager(BaseTest):
         self.assertEqual(certs[0].id, '892071a0-bb95-49bc-8021-3afd67a210bf')
         self.assertEqual(certs[0].name, 'web-cert-01')
         self.assertEqual(certs[0].sha1_fingerprint,
-            'dfcc9f57d86bf58e321c2c6c31c7a971be244ac7')
+                         'dfcc9f57d86bf58e321c2c6c31c7a971be244ac7')
         self.assertEqual(certs[0].not_after, '2017-02-22T00:23:00Z')
         self.assertEqual(certs[0].created_at, '2017-02-08T16:02:37Z')
         self.assertEqual(certs[0].type, 'custom')
@@ -473,7 +474,7 @@ class TestManager(BaseTest):
         self.assertEqual(certs[1].id, 'ba9b9c18-6c59-46c2-99df-70da170a42ba')
         self.assertEqual(certs[1].name, 'web-cert-02')
         self.assertEqual(certs[1].sha1_fingerprint,
-            '479c82b5c63cb6d3e6fac4624d58a33b267e166c')
+                         '479c82b5c63cb6d3e6fac4624d58a33b267e166c')
         self.assertEqual(certs[1].not_after, '2018-06-07T17:44:12Z')
         self.assertEqual(certs[1].created_at, '2018-03-09T18:44:11Z')
         self.assertEqual(certs[1].type, 'lets_encrypt')
@@ -655,6 +656,25 @@ class TestManager(BaseTest):
         self.assertEqual(p.is_default, False)
         self.assertEqual(p.created_at, '2018-09-27T20:10:35Z')
         self.assertEqual(p.updated_at, '2018-09-27T20:10:35Z')
+
+    @responses.activate
+    def test_get_all_projects(self):
+        data = self.load_from_file('projectresource/all.json')
+
+        url = self.base_url + f'projects/%s/resources' % self.project.id
+        responses.add(responses.GET,
+                      url,
+                      body=data,
+                      status=200,
+                      content_type='application/json')
+
+        resources = self.manager.get_project_resources(self.project.id)
+        r = resources[0]
+
+        self.assertEqual(r.urn, 'do:droplet:1')
+        self.assertEqual(r.assigned_at, '2018-09-28T19:26:37Z')
+        self.assertEqual(r.status, 'ok')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,6 +23,7 @@ from .Size import Size
 from .Snapshot import Snapshot
 from .Tag import Tag
 from .Volume import Volume
+from .ProjectResource import ProjectResource
 
 
 class Manager(BaseAPI):
@@ -392,6 +393,14 @@ class Manager(BaseAPI):
             project = Project(**jsoned)
             projects.append(project)
         return projects
+
+    def get_project_resources(self, project_id):
+        data = self.get_data('projects/%s/resources' % project_id)
+        resources = list()
+        for jsoned in data['resources']:
+            resource = ProjectResource(**jsoned)
+            resources.append(resource)
+        return resources
 
     def __str__(self):
         return "<Manager>"
