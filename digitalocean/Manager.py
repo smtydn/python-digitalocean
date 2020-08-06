@@ -26,6 +26,7 @@ from .Volume import Volume
 from .ProjectResource import ProjectResource
 from .Database import Database
 
+
 class Manager(BaseAPI):
     def __init__(self, *args, **kwargs):
         super(Manager, self).__init__(*args, **kwargs)
@@ -393,6 +394,9 @@ class Manager(BaseAPI):
             project = Project(**jsoned)
             projects.append(project)
         return projects
+
+    def get_project(self, project_id):
+        return Project.get_object(api_token=self.token, project_id=project_id)
 
     def get_project_resources(self, project_id):
         data = self.get_data('projects/%s/resources' % project_id)

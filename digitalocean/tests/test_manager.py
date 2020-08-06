@@ -14,7 +14,7 @@ class TestManager(BaseTest):
         self.image = digitalocean.Image(
             id=449676856, slug='testslug', token=self.token
         )
-        self.project = digitalocean.Project(id='4e1bfbc3-dc3e-41f2-a18f-1b4d7ba71679')
+        self.project = digitalocean.Project(id='4e1bfbc3-dc3e-41f2-a18f-1b4d7ba71679', token=self.token)
         self.database = digitalocean.Database(id='9cc10173-e9ea-4176-9dbc-a4cee4c4ff30')
 
     @responses.activate
@@ -792,6 +792,31 @@ class TestManager(BaseTest):
         self.assertEqual(d.size, 'db-s-2vcpu-4gb')
         self.assertListEqual(d.tags, ['production'])
         self.assertEqual(d.private_network_uuid, 'd455e75d-4858-4eec-8c95-da2f0a5f93a7')
+
+    @responses.activate
+    def test_get_project(self):
+        data = self.load_from_file('projects/single.json')
+        url = "{}projects/{}".format(self.base_url, self.project.id)
+
+        responses.add(responses.GET,
+                      url,
+                      body=data,
+                      status=200,
+                      content_type='application/json')
+
+        self.project.load()
+
+        self.assert_get_url_equal(responses.calls[0].request.url, url)
+        self.assertEqual(self.project.id, "4e1bfbc3-dc3e-41f2-a18f-1b4d7ba71679")
+        self.assertEqual(self.project.owner_uuid, "99525febec065ca37b2ffe4f852fd2b2581895e7")
+        self.assertEqual(self.project.owner_id, 2)
+        self.assertEqual(self.project.name, "my-web-api")
+        self.assertEqual(self.project.description, "My website API")
+        self.assertEqual(self.project.purpose, "Service or API")
+        self.assertEqual(self.project.environment, "Production")
+        self.assertEqual(self.project.is_default, False)
+        self.assertEqual(self.project.created_at, "2018-09-27T20:10:35Z")
+        self.assertEqual(self.project.updated_at, "2018-09-27T20:10:35Z")
 
 
 if __name__ == '__main__':
