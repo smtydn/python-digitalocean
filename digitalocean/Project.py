@@ -1,4 +1,5 @@
-from .baseapi import BaseAPI
+from typing import List
+from .baseapi import BaseAPI, POST
 
 
 class Project(BaseAPI):
@@ -34,3 +35,6 @@ class Project(BaseAPI):
 
     def __str__(self):
         return '<Project: %s>' % self.name
+
+    def assign_resources(self, resources: List[str]):
+        return self.get_data(f'projects/{self.id}/resources', type=POST, params={'resources': resources})
